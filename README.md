@@ -7,8 +7,8 @@ The creation of a configuration file for the sing-box and systemd daemon follows
 ## In order to begin, do the following:
 
 Run this command, which download and execute this script:
-```bash 
-<(curl -s https://raw.githubusercontent.com/reduxvzr/sing-box-script/main/sing-box-script.sh)
+```bash
+bash <(curl -s https://raw.githubusercontent.com/reduxvzr/sing-box-script/main/sing-box-script.sh)
 ```
 
 ## After installation:

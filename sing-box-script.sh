@@ -34,17 +34,13 @@ generate_random_nickname() {
 }
 
 # Генерация случайных паролей
-shadowsocks_password=$(generate_password)
 hysteria_password=$(generate_password)
 naive_username=$(generate_random_nickname)
 naive_password=$(generate_password)
-vless_uuid=$(uuidgen)
 
 # Генерация случайных портов
-shadowsocks_port=$(generate_random_port)
 hysteria_port=$(generate_random_port)
 naive_port=$(generate_random_port)
-vless_port=$(generate_random_port)
 
 # Генерация ключей и сертификатов
 sing-box generate tls-keypair "$DOMAIN" > output.txt
@@ -67,33 +63,38 @@ cat <<EOL > /tmp/new_conf.json
         "output": "/root/box.log",
         "timestamp": true
     },
+
     "dns": {
         "servers": [
             {
-                "tag": "cloudflare",
-                "address": "tls://1.1.1.1"
+                "tag": "local",
+                "type": "local"
+            }
+        ]
+    },
+
+    "route": {
+        "rules": [
+            {
+                "ip_is_private": true,
+                "outbound": "direct"
             },
             {
-                "tag": "block",
-                "address": "rcode://success"
+                "rule_set": "geoip-ru",
+                "outbound": "direct"
             }
         ],
-        "final": "cloudflare",
-        "strategy": "prefer_ipv4",
-        "disable_cache": false,
-        "disable_expire": false
-    },
-    "inbounds": [
-        {
-            "type": "shadowsocks",
-            "listen": "::",
-            "listen_port": $shadowsocks_port,
-            "method": "2022-blake3-aes-128-gcm",
-            "password": "$shadowsocks_password",
-            "multiplex": {
-                "enabled": true
+        "rule_set": [
+            {
+                "tag": "geoip-ru",
+                "type": "remote",
+                "format": "binary",
+                "url": "https://raw.githubusercontent.com/SagerNet/sing-geoip/rule-set/geoip-ru.srs"
             }
-        },
+        ]
+    },
+
+    "inbounds": [
         {
             "type": "hysteria2",
             "listen": "::",
@@ -139,31 +140,13 @@ cat <<EOL > /tmp/new_conf.json
                    "email": "$user_email"
                 }
             }
-        },
-        {
-            "type": "vless",
-            "listen": "::",
-            "listen_port": $vless_port,
-            "users" : [
-                {
-                    "uuid": "$vless_uuid",
-                    "flow": "xtls-rprx-vision"
-                }
-            ],
-            "tls": {
-                "enabled": true,
-                "server_name": "$DOMAIN",
-                "certificate_path": "/etc/sing-box/cert.pem",
-                "key_path": "/etc/sing-box/key.pem"
-                },
-            "multiplex": {
-                "enabled": true
-            }
         }
     ],
+
     "outbounds": [
         {
-            "type": "direct"
+            "type": "direct",
+            "tag": "direct"
         }
     ]
 }
@@ -182,16 +165,12 @@ sing-box check -c /etc/sing-box/config.json
 
 echo -e "\nДанные для аутентификации:"
 echo -e "Пароли
-shadowsocks: $shadowsocks_password 
 hysteria: $hysteria_password
 naive: $naive_username; $naive_password
-vless_uuid: $vless_uuid
 
 \nПорты:
-shadowsocks: $shadowsocks_port
 hysteria: $hysteria_port
 naive: $naive_port
-vless: $vless_port
 "
 
 # Создание демона systemd для sing-box

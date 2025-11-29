@@ -132,10 +132,8 @@ cat <<EOL > /tmp/new_conf.json
             "tls": {
                 "enabled": true,
                 "server_name": "$DOMAIN",
-                "acme": {
-                   "domain": "$DOMAIN",
-                   "email": "$user_email"
-                },
+                "certificate_path": "/etc/sing-box/cert.pem",
+                "key_path": "/etc/sing-box/key.pem"
                 "alpn": ["h2"]
             }
         }

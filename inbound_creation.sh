@@ -90,7 +90,7 @@ cat <<EOL > ./new_conf.json
                 "enabled": true,
                 "handshake": {
                     "server": "api.oneme.ru",
-                    "server_port": $vless_port
+                    "server_port": 443
                 },
                 "private_key": "$vless_private_key",
                 "short_id": [
@@ -131,15 +131,6 @@ cat <<EOL > ./new_conf.json
 EOL
 
 
-echo -e "\nДанные для аутентификации:"
-echo -e "Пароли
-hysteria: $hysteria_password
-vless: $vless_username; $vless_password
-naive: $naive_username; $naive_password
-
-\nПорты:
-hysteria: $hysteria_port
-vless: $vless_port
-naive: $naive_port
-
-\nVless Public Key: $vless_public_key"
+echo -e "
+\nVLESS Link: vless://$vless_reality_uuid@$(curl -s 2ip.io):$vless_port?security=reality&sni=api.oneme.ru&fp=chrome&pbk=$vless_public_key&sid=$vless_reality_shortID&type=tcp&flow=xtls-rprx-vision&encryption=none#vless_client
+\nHysteria Link: hy2://$hysteria_password@$(curl -s ifconfig.me):$hysteria_port?obfs=salamander&obfs-password=$hysteria_password&sni=$DOMAIN#hysteria_client"
